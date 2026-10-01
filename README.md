@@ -1,2 +1,2 @@
-# Tela-estica
-Solo le el 
+# Tela Estica — base estilo Cat Resolution
+Proyecto Android reconstruido para compilar mediante GitHub Actions. Incluye interfaz de resolución, selección de juego, Shizuku y overlay. Nota: wm size cambia la resolución del sistema; el comportamiento exclusivamente por juego requiere lógica adicional según dispositivo/ROM.
