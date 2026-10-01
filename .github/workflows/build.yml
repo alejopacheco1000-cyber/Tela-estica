@@ -1,4 +1,4 @@
-name: Build Tela Estica APK
+name: Build Cat Resolution Y9 Prime APK
 
 on:
   workflow_dispatch:
@@ -25,7 +25,7 @@ jobs:
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Tela-Estica-debug
+          name: CatResolution-Y9Prime-debug
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
