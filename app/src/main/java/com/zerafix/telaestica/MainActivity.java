@@ -47,8 +47,8 @@ public class MainActivity extends Activity {
         ImageView icon=new ImageView(this); icon.setImageResource(com.zerafix.telaestica.R.drawable.ic_tiger);
         head.addView(icon,new LinearLayout.LayoutParams(dp(44),dp(44)));
         LinearLayout titles=new LinearLayout(this); titles.setOrientation(LinearLayout.VERTICAL); titles.setPadding(dp(10),0,0,0);
-        TextView a=tv("TELA",22,Color.WHITE); a.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
-        TextView c=tv("ESTICA  •  TIGER EDITION",12,ORANGE); c.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
+        TextView a=tv("CAT",22,Color.WHITE); a.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
+        TextView c=tv("RESOLUTION  •  Y9 PRIME",12,ORANGE); c.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
         titles.addView(a); titles.addView(c); head.addView(titles,new LinearLayout.LayoutParams(0,dp(52),1));
         TextView gear=tv("⚙",25,Color.WHITE); gear.setGravity(Gravity.CENTER); gear.setOnClickListener(v->showSettings());
         head.addView(gear,new LinearLayout.LayoutParams(dp(48),dp(48)));
@@ -67,7 +67,7 @@ public class MainActivity extends Activity {
     void showHome(){
         clear();
         TextView h=tv("Panel de control",24,Color.WHITE); h.setTypeface(Typeface.DEFAULT,Typeface.BOLD); content.addView(h);
-        content.addView(tv("Estiramiento y recorte para tus juegos",13,MUTED));
+        content.addView(tv("Resolución y pantalla estirada para tus juegos",13,MUTED));
         content.addView(section("PERFIL ACTIVO"));
         LinearLayout game=card(); game.setPadding(dp(14),dp(10),dp(14),dp(10));
         LinearLayout gt=new LinearLayout(this); gt.setOrientation(LinearLayout.VERTICAL);
@@ -104,8 +104,8 @@ public class MainActivity extends Activity {
         content.addView(section("ACCESO"));
         modeSpinner=new Spinner(this); ArrayAdapter<String> ad=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"Shizuku","Root"}); modeSpinner.setAdapter(ad); modeSpinner.setSelection(prefs.getBoolean("root",false)?1:0); modeSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){prefs.edit().putBoolean("root",pos==1).apply();} public void onNothingSelected(android.widget.AdapterView<?> p){}}); content.addView(modeSpinner,new LinearLayout.LayoutParams(-1,dp(50)));
 
-        Button apply=btn("⚡  APLICAR AHORA"); apply.setTextColor(Color.BLACK); apply.setBackground(bg(ORANGE,14)); apply.setOnClickListener(v->applyNow()); content.addView(apply,new LinearLayout.LayoutParams(-1,dp(56)));
-        Button reset=btn("↺  RESTAURAR PANTALLA NORMAL"); reset.setOnClickListener(v->resetDisplay()); content.addView(reset,new LinearLayout.LayoutParams(-1,dp(52)));
+        Button apply=btn("⚡  APLICAR RESOLUCIÓN"); apply.setTextColor(Color.BLACK); apply.setBackground(bg(ORANGE,14)); apply.setOnClickListener(v->applyNow()); content.addView(apply,new LinearLayout.LayoutParams(-1,dp(56)));
+        Button reset=btn("↺  RESTAURAR PANTALLA ORIGINAL"); reset.setOnClickListener(v->resetDisplay()); content.addView(reset,new LinearLayout.LayoutParams(-1,dp(52)));
         status=tv("Estado: listo",12,MUTED); status.setGravity(Gravity.CENTER); status.setPadding(0,dp(10),0,dp(12)); content.addView(status);
     }
 
@@ -201,7 +201,7 @@ public class MainActivity extends Activity {
         Switch sw=new Switch(this); sw.setChecked(prefs.getBoolean("overlay",false)); sw.setOnCheckedChangeListener((b,c)->{prefs.edit().putBoolean("overlay",c).apply(); if(c){if(!Settings.canDrawOverlays(this)){startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:"+getPackageName())));} else startOverlayService();} else stopService(new Intent(this,OverlayService.class));}); ov.addView(sw); content.addView(ov);
         content.addView(section("PANTALLA"));
         Button nativeBtn=btn("USAR RESOLUCIÓN NATIVA"); nativeBtn.setOnClickListener(v->{android.util.DisplayMetrics m=getResources().getDisplayMetrics(); widthValue(String.valueOf(m.widthPixels)); heightValue(String.valueOf(m.heightPixels)); Toast.makeText(this,"Resolución nativa cargada",Toast.LENGTH_SHORT).show();}); content.addView(nativeBtn,new LinearLayout.LayoutParams(-1,dp(52)));
-        Button info=btn("ACERCA DE TELA ESTICA TIGER"); info.setOnClickListener(v->new AlertDialog.Builder(this).setTitle("Tela Estica • Tiger Edition").setMessage("Perfiles de juegos\nResolución personalizada\nEstiramiento 70–100%\nAplicar / restaurar\nShizuku y overlay").setPositiveButton("OK",null).show()); content.addView(info,new LinearLayout.LayoutParams(-1,dp(52)));
+        Button info=btn("ACERCA DE CAT RESOLUTION Y9"); info.setOnClickListener(v->new AlertDialog.Builder(this).setTitle("Cat Resolution • Y9 Prime").setMessage("Perfiles de juegos\nResolución personalizada\nEstiramiento 70–100%\nAplicar / restaurar\nShizuku y overlay").setPositiveButton("OK",null).show()); content.addView(info,new LinearLayout.LayoutParams(-1,dp(52)));
     }
 
     void startOverlayService(){ if(Build.VERSION.SDK_INT<23 || Settings.canDrawOverlays(this)) startService(new Intent(this,OverlayService.class)); }
