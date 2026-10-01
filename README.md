@@ -1,2 +1,12 @@
-# Tela Estica — base estilo Cat Resolution
-Proyecto Android reconstruido para compilar mediante GitHub Actions. Incluye interfaz de resolución, selección de juego, Shizuku y overlay. Nota: wm size cambia la resolución del sistema; el comportamiento exclusivamente por juego requiere lógica adicional según dispositivo/ROM.
+# Tela Estica — Tiger Edition
+
+Reconstrucción del APK subido, orientada a una interfaz tipo herramienta de resolución/pantalla estirada.
+
+Incluye:
+- Perfiles rápidos para juegos.
+- Detección de juegos instalados.
+- Resolución personalizada.
+- Estiramiento configurable 70–100%.
+- Aplicar/restaurar con Shizuku.
+- Indicador overlay opcional.
+- Icono de tigre.

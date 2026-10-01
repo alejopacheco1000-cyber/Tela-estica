@@ -1,5 +1,17 @@
 plugins { id 'com.android.application' }
-android { namespace 'com.zerafix.telaestica'; compileSdk 35
- defaultConfig { applicationId 'com.zerafix.telaestica'; minSdk 24; targetSdk 35; versionCode 3; versionName '2.1-catstyle' }
+
+android {
+    namespace 'com.zerafix.telaestica'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.zerafix.telaestica'
+        minSdk 24
+        targetSdk 35
+        versionCode 10
+        versionName '3.0-tiger'
+    }
 }
-dependencies { implementation 'dev.rikka.shizuku:api:13.1.5' }
+
+dependencies {
+    implementation 'dev.rikka.shizuku:api:13.1.5'
+}
