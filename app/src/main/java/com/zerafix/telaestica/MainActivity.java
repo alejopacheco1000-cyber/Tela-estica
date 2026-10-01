@@ -142,8 +142,11 @@ public class MainActivity extends Activity {
                 boolean use=prefs.getBoolean("shizuku",true);
                 if(!use || !Shizuku.pingBinder()){ runOnUiThread(()->status.setText("Necesitas activar Shizuku")); return; }
                 if(Shizuku.checkSelfPermission()!=PackageManager.PERMISSION_GRANTED){ runOnUiThread(this::requestShizuku); return; }
-                Process p=Shizuku.newProcess(new String[]{"sh","-c",cmd},null,null);
-                p.waitFor(); done.run();
+                java.lang.reflect.Method m=Shizuku.class.getDeclaredMethod("newProcess",String[].class,String[].class,String.class);
+                m.setAccessible(true);
+                Object rp=m.invoke(null,new Object[]{new String[]{"sh","-c",cmd},null,null});
+                java.lang.reflect.Method wait=rp.getClass().getMethod("waitFor");
+                wait.invoke(rp); done.run();
             }catch(Exception e){ runOnUiThread(()->status.setText("Error: "+e.getMessage())); }
         }).start();
     }
