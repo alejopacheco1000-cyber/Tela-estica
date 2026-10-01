@@ -10,3 +10,7 @@ Incluye:
 - Aplicar/restaurar con Shizuku.
 - Indicador overlay opcional.
 - Icono de tigre.
+
+
+## Compilación APK
+El flujo Build Tela Estica APK se ejecuta al actualizar `main`. Consulta Actions para ver el resultado y descargar el APK si la compilación finaliza correctamente.
