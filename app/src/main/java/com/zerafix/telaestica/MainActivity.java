@@ -19,10 +19,12 @@ import rikka.shizuku.Shizuku;
 public class MainActivity extends Activity {
     static final int ORANGE=Color.rgb(255,138,0), BG=Color.rgb(8,9,12), CARD=Color.rgb(19,22,28), MUTED=Color.rgb(150,155,165);
     LinearLayout root, content, nav;
-    TextView status, profileTitle, resolutionValue, stretchValue;
-    SeekBar stretch;
-    EditText width, height;
+    TextView status, profileTitle, resolutionValue, stretchValue, cropValue;
+    SeekBar stretch, crop;
+    EditText width, height, dpi;
     String selectedGame="Sin juego seleccionado", selectedPackage="";
+    Spinner modeSpinner;
+    int ORANGE2=Color.rgb(255,170,35);
     SharedPreferences prefs;
 
     int dp(float v){ return (int)(v*getResources().getDisplayMetrics().density+0.5f); }
@@ -65,33 +67,52 @@ public class MainActivity extends Activity {
     void showHome(){
         clear();
         TextView h=tv("Panel de control",24,Color.WHITE); h.setTypeface(Typeface.DEFAULT,Typeface.BOLD); content.addView(h);
-        TextView sub=tv("Configura la pantalla para tus juegos",13,MUTED); content.addView(sub);
+        content.addView(tv("Estiramiento y recorte para tus juegos",13,MUTED));
         content.addView(section("PERFIL ACTIVO"));
-        LinearLayout game=card(); game.setPadding(dp(14),dp(12),dp(14),dp(12));
+        LinearLayout game=card(); game.setPadding(dp(14),dp(10),dp(14),dp(10));
         LinearLayout gt=new LinearLayout(this); gt.setOrientation(LinearLayout.VERTICAL);
         profileTitle=tv(selectedGame,16,Color.WHITE); profileTitle.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
         gt.addView(profileTitle); gt.addView(tv(selectedPackage.length()>0?selectedPackage:"Selecciona un juego o perfil",11,MUTED));
         game.addView(gt,new LinearLayout.LayoutParams(0,dp(58),1));
         Button pick=btn("CAMBIAR"); pick.setOnClickListener(v->showGames()); game.addView(pick,new LinearLayout.LayoutParams(dp(105),dp(48)));
         content.addView(game);
-        content.addView(section("RESOLUCIÓN PERSONALIZADA"));
+
+        content.addView(section("RESOLUCIÓN"));
         LinearLayout res=card(); res.setPadding(dp(14),dp(8),dp(14),dp(8));
-        width=edit("1080"); height=edit("1920");
+        width=edit(prefs.getString("width","1080")); height=edit(prefs.getString("height","1920"));
         res.addView(width,new LinearLayout.LayoutParams(0,dp(54),1)); TextView x=tv(" × ",18,MUTED); x.setGravity(Gravity.CENTER); res.addView(x); res.addView(height,new LinearLayout.LayoutParams(0,dp(54),1));
         content.addView(res);
-        content.addView(section("ESTIRAMIENTO  < 70% — 100% >"));
-        LinearLayout s=card(); s.setPadding(dp(14),dp(8),dp(14),dp(2));
-        stretch=new SeekBar(this); stretch.setMax(30); stretch.setProgress(prefs.getInt("stretch",20)); stretch.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
-            public void onProgressChanged(SeekBar b,int p,boolean f){ int v=70+p; stretchValue.setText(v+"%"); }
-            public void onStartTrackingTouch(SeekBar b){} public void onStopTrackingTouch(SeekBar b){}
-        }); s.addView(stretch,new LinearLayout.LayoutParams(-1,dp(45)));
-        stretchValue=tv((70+stretch.getProgress())+"%",15,ORANGE); stretchValue.setGravity(Gravity.CENTER); s.addView(stretchValue,new LinearLayout.LayoutParams(-1,dp(28)));
-        content.addView(s);
-        LinearLayout actions=new LinearLayout(this); actions.setPadding(0,dp(12),0,0);
-        Button apply=btn("⚡  APLICAR AHORA"); apply.setTextColor(Color.BLACK); apply.setBackground(bg(ORANGE,14)); apply.setOnClickListener(v->applyNow());
-        actions.addView(apply,new LinearLayout.LayoutParams(0,dp(56),1)); content.addView(actions);
-        Button reset=btn("RESTAURAR PANTALLA NORMAL"); reset.setOnClickListener(v->resetDisplay()); content.addView(reset,new LinearLayout.LayoutParams(-1,dp(52)));
-        status=tv("Estado: listo",12,MUTED); status.setGravity(Gravity.CENTER); status.setPadding(0,dp(12),0,dp(12)); content.addView(status);
+
+        LinearLayout presetRow=new LinearLayout(this); String[] presets={"16:9","18:9","19.5:9","Ultra"}; 
+        for(String p:presets){ Button b=btn(p); b.setTextSize(11); b.setOnClickListener(v->applyPreset(p)); presetRow.addView(b,new LinearLayout.LayoutParams(0,dp(44),1)); } content.addView(presetRow);
+
+        content.addView(section("ESTIRAMIENTO"));
+        LinearLayout s=card(); s.setPadding(dp(14),dp(5),dp(14),dp(2));
+        stretch=new SeekBar(this); stretch.setMax(40); stretch.setProgress(prefs.getInt("stretch",20)); 
+        stretch.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){ public void onProgressChanged(SeekBar b,int p,boolean f){stretchValue.setText((60+p)+"%");} public void onStartTrackingTouch(SeekBar b){} public void onStopTrackingTouch(SeekBar b){}});
+        s.addView(stretch,new LinearLayout.LayoutParams(-1,dp(42))); stretchValue=tv((60+stretch.getProgress())+"%",15,ORANGE); stretchValue.setGravity(Gravity.CENTER); s.addView(stretchValue,new LinearLayout.LayoutParams(-1,dp(28))); content.addView(s);
+
+        content.addView(section("RECORTE LATERAL"));
+        LinearLayout cr=card(); cr.setPadding(dp(14),dp(5),dp(14),dp(2));
+        crop=new SeekBar(this); crop.setMax(30); crop.setProgress(prefs.getInt("crop",0)); 
+        crop.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){ public void onProgressChanged(SeekBar b,int p,boolean f){cropValue.setText(p+"%");} public void onStartTrackingTouch(SeekBar b){} public void onStopTrackingTouch(SeekBar b){}});
+        cr.addView(crop,new LinearLayout.LayoutParams(-1,dp(42))); cropValue=tv(crop.getProgress()+"%",15,ORANGE); cropValue.setGravity(Gravity.CENTER); cr.addView(cropValue,new LinearLayout.LayoutParams(-1,dp(28))); content.addView(cr);
+
+        content.addView(section("DPI / DENSIDAD"));
+        dpi=edit(prefs.getString("dpi","")); dpi.setHint("Automático"); dpi.setTextColor(Color.WHITE); dpi.setHintTextColor(MUTED); content.addView(dpi,new LinearLayout.LayoutParams(-1,dp(52)));
+
+        content.addView(section("ACCESO"));
+        modeSpinner=new Spinner(this); ArrayAdapter<String> ad=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"Shizuku","Root"}); modeSpinner.setAdapter(ad); modeSpinner.setSelection(prefs.getBoolean("root",false)?1:0); modeSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onItemSelected(android.widget.AdapterView<?> p,View v,int pos,long id){prefs.edit().putBoolean("root",pos==1).apply();} public void onNothingSelected(android.widget.AdapterView<?> p){}}); content.addView(modeSpinner,new LinearLayout.LayoutParams(-1,dp(50)));
+
+        Button apply=btn("⚡  APLICAR AHORA"); apply.setTextColor(Color.BLACK); apply.setBackground(bg(ORANGE,14)); apply.setOnClickListener(v->applyNow()); content.addView(apply,new LinearLayout.LayoutParams(-1,dp(56)));
+        Button reset=btn("↺  RESTAURAR PANTALLA NORMAL"); reset.setOnClickListener(v->resetDisplay()); content.addView(reset,new LinearLayout.LayoutParams(-1,dp(52)));
+        status=tv("Estado: listo",12,MUTED); status.setGravity(Gravity.CENTER); status.setPadding(0,dp(10),0,dp(12)); content.addView(status);
+    }
+
+    void applyPreset(String p){
+        int w=1080,h=1920;
+        if(p.equals("16:9")){w=1080;h=1920;} else if(p.equals("18:9")){w=1080;h=2160;} else if(p.equals("19.5:9")){w=1080;h=2340;} else {w=1280;h=2560;}
+        width.setText(String.valueOf(w)); height.setText(String.valueOf(h)); Toast.makeText(this,"Preset "+p+" cargado",Toast.LENGTH_SHORT).show();
     }
 
     LinearLayout card(){ LinearLayout l=new LinearLayout(this); l.setGravity(Gravity.CENTER_VERTICAL); l.setBackground(bg(CARD,16)); l.setPadding(dp(4),dp(4),dp(4),dp(4)); LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2); p.bottomMargin=dp(8); l.setLayoutParams(p); return l; }
@@ -125,33 +146,43 @@ public class MainActivity extends Activity {
 
     void applyNow(){
         String w=width.getText().toString().trim(), h=height.getText().toString().trim();
-        int pct=70+stretch.getProgress(); prefs.edit().putInt("stretch",stretch.getProgress()).putString("width",w).putString("height",h).apply();
+        int pct=60+stretch.getProgress(), cropPct=crop.getProgress();
+        prefs.edit().putInt("stretch",stretch.getProgress()).putInt("crop",cropPct).putString("width",w).putString("height",h).putString("dpi",dpi.getText().toString()).apply();
         if(w.isEmpty()||h.isEmpty()){status.setText("Estado: introduce ancho y alto"); return;}
-        int ww; try{ww=Integer.parseInt(w);}catch(Exception e){status.setText("Estado: resolución no válida");return;}
-        int hh; try{hh=Integer.parseInt(h);}catch(Exception e){status.setText("Estado: resolución no válida");return;}
-        int stretchedW=Math.max(240,Math.round(ww*pct/100f));
-        status.setText("Aplicando "+stretchedW+" × "+hh+"  •  "+pct+"%...");
-        runWm("wm size "+stretchedW+"x"+hh,()->runOnUiThread(()->{status.setText("✓ Pantalla estirada aplicada"); if(prefs.getBoolean("overlay",false)) startOverlayService();}));
+        try{
+            int ww=Integer.parseInt(w), hh=Integer.parseInt(h);
+            int stretchedW=Math.max(240,Math.round(ww*pct/100f));
+            if(cropPct>0) stretchedW=Math.max(240,stretchedW-Math.round(stretchedW*cropPct/100f));
+            String cmd="wm size "+stretchedW+"x"+hh;
+            String d=dpi.getText().toString().trim(); if(!d.isEmpty()) cmd+=" && wm density "+Integer.parseInt(d);
+            status.setText("Aplicando "+stretchedW+" × "+hh+" • "+pct+"%...");
+            runCommand(cmd,()->runOnUiThread(()->{status.setText("✓ Pantalla aplicada"); if(prefs.getBoolean("overlay",false)) startOverlayService();}));
+        }catch(Exception e){status.setText("Estado: valores no válidos");}
     }
 
-    void resetDisplay(){ status.setText("Restaurando pantalla..."); runWm("wm size reset",()->runOnUiThread(()->status.setText("✓ Pantalla normal restaurada"))); }
+    void resetDisplay(){
+        status.setText("Restaurando pantalla...");
+        runCommand("wm size reset && wm density reset",()->runOnUiThread(()->status.setText("✓ Pantalla normal restaurada")));
+    }
 
-    void runWm(String cmd,Runnable done){
+    void runCommand(String cmd,Runnable done){
         new Thread(()->{
             try{
-                boolean use=prefs.getBoolean("shizuku",true);
-                if(!use || !Shizuku.pingBinder()){ runOnUiThread(()->status.setText("Necesitas activar Shizuku")); return; }
-                if(Shizuku.checkSelfPermission()!=PackageManager.PERMISSION_GRANTED){ runOnUiThread(this::requestShizuku); return; }
-                java.lang.reflect.Method m=Shizuku.class.getDeclaredMethod("newProcess",String[].class,String[].class,String.class);
-                m.setAccessible(true);
-                Object rp=m.invoke(null,new Object[]{new String[]{"sh","-c",cmd},null,null});
-                java.lang.reflect.Method wait=rp.getClass().getMethod("waitFor");
-                wait.invoke(rp); done.run();
-            }catch(Exception e){ runOnUiThread(()->status.setText("Error: "+e.getMessage())); }
+                boolean rootMode=prefs.getBoolean("root",false);
+                if(rootMode){
+                    Process p=new ProcessBuilder("su","-c",cmd).redirectErrorStream(true).start();
+                    int code=p.waitFor(); if(code!=0) throw new RuntimeException("Root rechazó el comando");
+                }else{
+                    if(!Shizuku.pingBinder()){runOnUiThread(()->status.setText("Necesitas iniciar Shizuku")); return;}
+                    if(Shizuku.checkSelfPermission()!=PackageManager.PERMISSION_GRANTED){runOnUiThread(this::requestShizuku); return;}
+                    java.lang.reflect.Method m=Shizuku.class.getDeclaredMethod("newProcess",String[].class,String[].class,String.class); m.setAccessible(true);
+                    Object rp=m.invoke(null,new Object[]{new String[]{"sh","-c",cmd},null,null});
+                    java.lang.reflect.Method wait=rp.getClass().getMethod("waitFor"); int code=(Integer)wait.invoke(rp); if(code!=0) throw new RuntimeException("Comando rechazado");
+                }
+                done.run();
+            }catch(Exception e){runOnUiThread(()->status.setText("Error: "+e.getMessage()));}
         }).start();
     }
-
-    void requestShizuku(){ try{ Shizuku.requestPermission(100); }catch(Exception e){ Toast.makeText(this,"Abre Shizuku y autoriza Tela Estica",Toast.LENGTH_LONG).show(); } }
 
     void showSettings(){
         clear();
