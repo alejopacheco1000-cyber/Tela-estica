@@ -170,7 +170,7 @@ public class MainActivity extends Activity {
             try{
                 boolean rootMode=prefs.getBoolean("root",false);
                 if(rootMode){
-                    Process p=new ProcessBuilder("su","-c",cmd).redirectErrorStream(true).start();
+                    java.lang.Process p=new ProcessBuilder("su","-c",cmd).redirectErrorStream(true).start();
                     int code=p.waitFor(); if(code!=0) throw new RuntimeException("Root rechazó el comando");
                 }else{
                     if(!Shizuku.pingBinder()){runOnUiThread(()->status.setText("Necesitas iniciar Shizuku")); return;}
@@ -182,6 +182,11 @@ public class MainActivity extends Activity {
                 done.run();
             }catch(Exception e){runOnUiThread(()->status.setText("Error: "+e.getMessage()));}
         }).start();
+    }
+
+    void requestShizuku(){
+        try{ Shizuku.requestPermission(100); }
+        catch(Exception e){ Toast.makeText(this,"Abre Shizuku y autoriza Tela Estica",Toast.LENGTH_LONG).show(); }
     }
 
     void showSettings(){
