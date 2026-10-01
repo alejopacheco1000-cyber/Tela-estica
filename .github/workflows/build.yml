@@ -28,3 +28,5 @@ jobs:
           name: Tela-Estica-debug
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+# Build trigger 2026-10-01
